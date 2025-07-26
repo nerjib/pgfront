@@ -98,10 +98,19 @@ export function LoanQuickActions({ loan, onAction, isLoading }) {
               return (
                 <ModalComponent
                   key={action.id}
-                  loan={loan}
-                  onPaymentRecorded={(paymentData) => {
-                    console.log("Payment recorded:", paymentData)
-                    onAction(action.id, paymentData)
+                  loan={{
+                    id: loan.loan_id,
+                    loanNumber: loan.loan_id,
+                    customer: { name: loan.customer.name },
+                    loanDetails: {
+                      remainingAmount: loan.remainingAmount,
+                      monthlyPayment: loan.monthlyPayment,
+                      nextPaymentDate: loan.nextPaymentDate,
+                      status: loan.status,
+                    },
+                  }}
+                  onPaymentRecorded={() => {
+                    onAction("paymentRecorded");
                   }}
                   trigger={
                     <Button
@@ -165,19 +174,19 @@ export function LoanQuickActions({ loan, onAction, isLoading }) {
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Status:</span>
             <div className="flex items-center space-x-1">
-              {loan.loanDetails.status === "Current" ? (
+              {loan.status === "Current" ? (
                 <CreditCard className="h-4 w-4 text-green-500" />
               ) : (
                 <AlertTriangle className="h-4 w-4 text-red-500" />
               )}
-              <span className="text-sm font-medium">{loan.loanDetails.status}</span>
+              <span className="text-sm font-medium">{loan.status}</span>
             </div>
           </div>
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Progress:</span>
             <span className="text-sm font-medium">
-              {((loan.loanDetails.paidAmount / loan.loanDetails.totalAmount) * 100).toFixed(1)}%
+              {(parseFloat(loan.progress) || 0).toFixed(1)}%
             </span>
           </div>
 
@@ -185,13 +194,13 @@ export function LoanQuickActions({ loan, onAction, isLoading }) {
             <span className="text-sm text-muted-foreground">Next Payment:</span>
             <div className="flex items-center space-x-1">
               <Clock className="h-4 w-4" />
-              <span className="text-sm font-medium">{loan.loanDetails.nextPaymentDate}</span>
+              <span className="text-sm font-medium">{new Date(loan.nextPaymentDate).toLocaleDateString()}</span>
             </div>
           </div>
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Remaining:</span>
-            <span className="text-sm font-medium">NGN {loan.loanDetails.remainingAmount.toLocaleString()}</span>
+            <span className="text-sm font-medium">NGN {loan.remainingAmount.toLocaleString()}</span>
           </div>
         </CardContent>
       </Card>

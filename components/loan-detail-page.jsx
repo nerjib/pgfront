@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+"use client"
+
+import { useState, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,147 +27,40 @@ import {
 import Link from "next/link"
 import { EditLoanModal } from "./modals/edit-loan-modal"
 import { LoanQuickActions } from "./loan-quick-actions"
-
-// Mock data - replace with actual data fetching
-const getLoanData = (loanId) => {
-  return {
-    id: loanId,
-    loanNumber: "LN001",
-    customer: {
-      id: "CUST001",
-      name: "James Ochieng",
-      phone: "+254 712 345 678",
-      email: "james.ochieng@email.com",
-      location: "Kibera, Nairobi",
-      idNumber: "12345678",
-      creditScore: 85,
-    },
-    device: {
-      id: "DEV001",
-      serialNumber: "SLR-2024-001",
-      type: "Solar Home System",
-      model: "SHS-50W",
-      status: "Active",
-    },
-    loanDetails: {
-      principalAmount: 25000,
-      interestRate: 12.5,
-      termMonths: 12,
-      monthlyPayment: 2500,
-      totalAmount: 30000,
-      paidAmount: 18500,
-      remainingAmount: 11500,
-      status: "Current",
-      startDate: "2024-01-15",
-      endDate: "2024-12-15",
-      nextPaymentDate: "2024-03-15",
-      daysOverdue: 0,
-      collateral: "Solar Home System",
-    },
-    paymentHistory: [
-      {
-        id: 1,
-        date: "2024-02-28",
-        amount: 2500,
-        method: "Mobile Money",
-        reference: "MP240228001",
-        status: "Completed",
-        lateFee: 0,
-      },
-      {
-        id: 2,
-        date: "2024-01-28",
-        amount: 2500,
-        method: "Mobile Money",
-        reference: "MP240128001",
-        status: "Completed",
-        lateFee: 0,
-      },
-      {
-        id: 3,
-        date: "2024-01-15",
-        amount: 13500,
-        method: "Cash",
-        reference: "CASH001",
-        status: "Completed",
-        lateFee: 0,
-        note: "Initial down payment",
-      },
-    ],
-    loanSchedule: [
-      {
-        installment: 1,
-        dueDate: "2024-01-15",
-        principalAmount: 1875,
-        interestAmount: 625,
-        totalAmount: 2500,
-        status: "Paid",
-        paidDate: "2024-01-15",
-      },
-      {
-        installment: 2,
-        dueDate: "2024-02-15",
-        principalAmount: 1895,
-        interestAmount: 605,
-        totalAmount: 2500,
-        status: "Paid",
-        paidDate: "2024-02-14",
-      },
-      {
-        installment: 3,
-        dueDate: "2024-03-15",
-        principalAmount: 1915,
-        interestAmount: 585,
-        totalAmount: 2500,
-        status: "Due",
-        paidDate: null,
-      },
-      {
-        installment: 4,
-        dueDate: "2024-04-15",
-        principalAmount: 1935,
-        interestAmount: 565,
-        totalAmount: 2500,
-        status: "Pending",
-        paidDate: null,
-      },
-    ],
-    recentActivities: [
-      {
-        id: 1,
-        type: "payment",
-        message: "Payment received: NGN 2,500",
-        timestamp: "2024-02-28 09:15",
-        status: "success",
-      },
-      {
-        id: 2,
-        type: "reminder",
-        message: "Payment reminder sent via SMS",
-        timestamp: "2024-02-25 14:30",
-        status: "info",
-      },
-      {
-        id: 3,
-        type: "restructure",
-        message: "Loan terms updated - extended by 2 months",
-        timestamp: "2024-02-20 11:45",
-        status: "warning",
-      },
-      {
-        id: 4,
-        type: "assessment",
-        message: "Credit assessment completed",
-        timestamp: "2024-01-10 16:20",
-        status: "success",
-      },
-    ],
-  }
-}
+import https from "@/services/https";
 
 export default function LoanDetailPage({ loanId }) {
-  const loan = getLoanData(loanId)
-  const [isLoading, setIsLoading] = useState(false)
+  const [loan, setLoan] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchLoanData = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/loans/${loanId}`, {
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch loan data");
+      }
+      const data = await response.json();
+      setLoan(data);
+    } catch (err) {
+      setError(err.message);
+      console.error("Error fetching loan:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loanId) {
+      fetchLoanData();
+    }
+  }, [loanId]);
 
   const handleLoanAction = async (action) => {
     setIsLoading(true)
@@ -175,8 +70,15 @@ export default function LoanDetailPage({ loanId }) {
     setIsLoading(false)
   }
 
-  const loanProgress = (loan.loanDetails.paidAmount / loan.loanDetails.totalAmount) * 100
-  const principalProgress = (loan.loanDetails.paidAmount / loan.loanDetails.principalAmount) * 100
+  if (isLoading || !loan) {
+    return <div>Loading loan data...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  const loanProgress = parseFloat(loan.progress) || 0;
 
   return (
     <div className="space-y-6">
@@ -190,24 +92,24 @@ export default function LoanDetailPage({ loanId }) {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold">Loan {loan.loanNumber}</h1>
+            <h1 className="text-3xl font-bold">Loan {loan.loan_id}</h1>
             <p className="text-muted-foreground">{loan.customer.name}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
           <Badge
             variant={
-              loan.loanDetails.status === "Current"
+              loan.status === "Current"
                 ? "default"
-                : loan.loanDetails.status === "Overdue"
+                : loan.status === "Overdue"
                   ? "destructive"
                   : "secondary"
             }
           >
-            {loan.loanDetails.status}
-            {loan.loanDetails.daysOverdue > 0 && ` (${loan.loanDetails.daysOverdue}d overdue)`}
+            {loan.status}
+            {/* {loan.loanDetails.daysOverdue > 0 && ` (${loan.loanDetails.daysOverdue}d overdue)`} */}
           </Badge>
-          <EditLoanModal loan={loan} />
+          <EditLoanModal loan={loan} onUpdate={fetchLoanData} />
         </div>
       </div>
 
@@ -222,7 +124,7 @@ export default function LoanDetailPage({ loanId }) {
             <div className="text-2xl font-bold">{loanProgress.toFixed(1)}%</div>
             <Progress value={loanProgress} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
-              NGN {loan.loanDetails.remainingAmount.toLocaleString()} remaining
+              NGN {loan.remainingAmount.toLocaleString()} remaining
             </p>
           </CardContent>
         </Card>
@@ -233,8 +135,8 @@ export default function LoanDetailPage({ loanId }) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">NGN {loan.loanDetails.paidAmount.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">of NGN {loan.loanDetails.totalAmount.toLocaleString()}</p>
+            <div className="text-2xl font-bold">NGN {loan.paidAmount.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">of NGN {loan.totalAmount.toLocaleString()}</p>
           </CardContent>
         </Card>
 
@@ -244,8 +146,8 @@ export default function LoanDetailPage({ loanId }) {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">NGN {loan.loanDetails.monthlyPayment.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Due: {loan.loanDetails.nextPaymentDate}</p>
+            <div className="text-2xl font-bold">NGN {loan.monthlyPayment.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Due: {new Date(loan.nextPaymentDate).toLocaleDateString()}</p>
           </CardContent>
         </Card>
 
@@ -284,34 +186,42 @@ export default function LoanDetailPage({ loanId }) {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Principal Amount:</span>
                       <span className="text-sm font-medium">
-                        NGN {loan.loanDetails.principalAmount.toLocaleString()}
+                        NGN {loan.totalAmount.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Interest Rate:</span>
-                      <span className="text-sm font-medium">{loan.loanDetails.interestRate}% p.a.</span>
+                      <span className="text-sm font-medium">{/* loan.loanDetails.interestRate */}N/A</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Term:</span>
-                      <span className="text-sm font-medium">{loan.loanDetails.termMonths} months</span>
+                      <span className="text-sm font-medium">{loan.termMonths} months</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Monthly Payment:</span>
                       <span className="text-sm font-medium">
-                        NGN {loan.loanDetails.monthlyPayment.toLocaleString()}
+                        NGN {loan.monthlyPayment.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Start Date:</span>
-                      <span className="text-sm font-medium">{loan.loanDetails.startDate}</span>
+                      <span className="text-sm font-medium">{new Date(loan.startDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">End Date:</span>
-                      <span className="text-sm font-medium">{loan.loanDetails.endDate}</span>
+                      <span className="text-sm font-medium">{new Date(loan.endDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Collateral:</span>
-                      <span className="text-sm font-medium">{loan.loanDetails.collateral}</span>
+                      <span className="text-sm text-muted-foreground">Guarantor:</span>
+                      <span className="text-sm font-medium">
+                        {loan.guarantorDetails ? loan.guarantorDetails.name : "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Assigned Agent:</span>
+                      <span className="text-sm font-medium">
+                        {loan.agent ? loan.agent.username : "N/A"}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -396,9 +306,9 @@ export default function LoanDetailPage({ loanId }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {loan.paymentHistory.map((payment) => (
+                      {loan.paymentHistory && loan.paymentHistory.map((payment) => (
                         <TableRow key={payment.id}>
-                          <TableCell>{payment.date}</TableCell>
+                          <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
                           <TableCell>NGN {payment.amount.toLocaleString()}</TableCell>
                           <TableCell>{payment.method}</TableCell>
                           <TableCell>{payment.reference}</TableCell>
@@ -434,28 +344,12 @@ export default function LoanDetailPage({ loanId }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {loan.loanSchedule.map((installment) => (
-                        <TableRow key={installment.installment}>
-                          <TableCell>{installment.installment}</TableCell>
-                          <TableCell>{installment.dueDate}</TableCell>
-                          <TableCell>NGN {installment.principalAmount.toLocaleString()}</TableCell>
-                          <TableCell>NGN {installment.interestAmount.toLocaleString()}</TableCell>
-                          <TableCell>NGN {installment.totalAmount.toLocaleString()}</TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                installment.status === "Paid"
-                                  ? "default"
-                                  : installment.status === "Due"
-                                    ? "destructive"
-                                    : "secondary"
-                              }
-                            >
-                              {installment.status}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {/* Loan schedule data is not directly available from the API in this format */}
+                      <TableRow>
+                        <TableCell colSpan="6" className="text-center text-muted-foreground">
+                          Payment schedule not available.
+                        </TableCell>
+                      </TableRow>
                     </TableBody>
                   </Table>
                 </CardContent>
@@ -469,22 +363,10 @@ export default function LoanDetailPage({ loanId }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {loan.recentActivities.map((activity) => (
-                      <div key={activity.id} className="flex items-start space-x-3">
-                        <div className="mt-1">
-                          {activity.status === "success" && <CheckCircle className="h-4 w-4 text-green-500" />}
-                          {activity.status === "warning" && <AlertTriangle className="h-4 w-4 text-yellow-500" />}
-                          {activity.status === "info" && <Clock className="h-4 w-4 text-blue-500" />}
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{activity.message}</p>
-                          <p className="text-xs text-muted-foreground flex items-center">
-                            <Clock className="mr-1 h-3 w-3" />
-                            {activity.timestamp}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                    {/* Activities data is not directly available from the API in this format */}
+                    <div className="text-center text-muted-foreground">
+                      No recent activities available.
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -498,3 +380,4 @@ export default function LoanDetailPage({ loanId }) {
     </div>
   )
 }
+
