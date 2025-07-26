@@ -56,7 +56,7 @@ export default function CustomersPage() {
           <h1 className="text-3xl font-bold">Customers</h1>
           <p className="text-muted-foreground">Manage customer profiles and loan portfolios</p>
         </div>
-        <AddCustomerModal />
+        <AddCustomerModal onCustomerAdded={fetchCustomers} />
       </div>
 
       {/* Summary Cards */}

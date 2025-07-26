@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,151 +23,58 @@ import Link from "next/link"
 import { EditCustomerModal } from "./modals/edit-customer-modal"
 import { CustomerQuickActions } from "./customer-quick-actions"
 
-// Mock data - replace with actual data fetching
-const getCustomerData = (customerId) => {
-  return {
-    id: customerId,
-    personalInfo: {
-      name: "James Ochieng",
-      email: "james.ochieng@email.com",
-      phone: "+254 712 345 678",
-      alternatePhone: "+254 701 234 567",
-      idNumber: "12345678",
-      dateOfBirth: "1985-06-15",
-      gender: "Male",
-      maritalStatus: "Married",
-      occupation: "Small Business Owner",
-      monthlyIncome: 25000,
-      dependents: 3,
-    },
-    address: {
-      location: "Kibera, Nairobi",
-      county: "Nairobi",
-      ward: "Kibra",
-      nearestLandmark: "Kibera Primary School",
-      gpsCoordinates: "-1.3133, 36.7833",
-    },
-    creditInfo: {
-      creditScore: 85,
-      creditHistory: "Excellent",
-      joinDate: "2024-01-15",
-      status: "Active",
-      riskLevel: "Low",
-      totalCreditLimit: 50000,
-      availableCredit: 25000,
-    },
-    loans: [
-      {
-        id: "LN001",
-        deviceId: "DEV001",
-        deviceType: "Solar Home System",
-        principalAmount: 25000,
-        totalAmount: 30000,
-        paidAmount: 18500,
-        remainingAmount: 11500,
-        monthlyPayment: 2500,
-        startDate: "2024-01-15",
-        endDate: "2024-12-15",
-        status: "Current",
-        nextPaymentDate: "2024-03-15",
-        progress: 61.7,
-      },
-    ],
-    devices: [
-      {
-        id: "DEV001",
-        serialNumber: "SLR-2024-001",
-        type: "Solar Home System",
-        model: "SHS-50W",
-        status: "Active",
-        installDate: "2024-01-15",
-        batteryLevel: 85,
-        lastSync: "2 minutes ago",
-      },
-    ],
-    paymentHistory: [
-      {
-        id: 1,
-        date: "2024-02-28",
-        amount: 2500,
-        method: "Mobile Money",
-        reference: "MP240228001",
-        status: "Completed",
-        loanId: "LN001",
-      },
-      {
-        id: 2,
-        date: "2024-01-28",
-        amount: 2500,
-        method: "Mobile Money",
-        reference: "MP240128001",
-        status: "Completed",
-        loanId: "LN001",
-      },
-      {
-        id: 3,
-        date: "2024-01-15",
-        amount: 13500,
-        method: "Cash",
-        reference: "CASH001",
-        status: "Completed",
-        loanId: "LN001",
-      },
-    ],
-    recentActivities: [
-      {
-        id: 1,
-        type: "payment",
-        message: "Payment received: NGN 2,500",
-        timestamp: "2024-02-28 09:15",
-        status: "success",
-      },
-      {
-        id: 2,
-        type: "device",
-        message: "Device synchronized successfully",
-        timestamp: "2024-02-28 08:30",
-        status: "success",
-      },
-      {
-        id: 3,
-        type: "communication",
-        message: "Payment reminder sent via SMS",
-        timestamp: "2024-02-25 14:30",
-        status: "info",
-      },
-      {
-        id: 4,
-        type: "credit",
-        message: "Credit score updated: 85 (+2)",
-        timestamp: "2024-02-20 11:45",
-        status: "success",
-      },
-    ],
-  }
-}
+import { useState, useEffect } from "react"
+import https from "@/services/https";
 
 export default function CustomerDetailPage({ customerId }) {
-  const customer = getCustomerData(customerId)
-  const [isLoading, setIsLoading] = useState(false)
+  const [customer, setCustomer] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`${https.baseUrl}/customers/${customerId}`, {
+          headers: {
+            "x-auth-token": token,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch customer data");
+        }
+        const data = await response.json();
+        setCustomer(data);
+      } catch (error) {
+        console.error("Error fetching customer:", error);
+      }
+    };
+
+    if (customerId) {
+      fetchCustomer();
+    }
+  }, [customerId]);
 
   const handleCustomerAction = async (action) => {
-    setIsLoading(true)
-    console.log(`Performing ${action} on customer ${customerId}`)
+    setIsLoading(true);
+    console.log(`Performing ${action} on customer ${customerId}`);
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsLoading(false)
-  }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setIsLoading(false);
+  };
 
   const getCreditScoreColor = (score) => {
-    if (score >= 80) return "text-green-600"
-    if (score >= 60) return "text-yellow-600"
-    return "text-red-600"
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  if (!customer) {
+    return <div>Loading customer data...</div>;
   }
 
-  const totalBorrowed = customer.loans.reduce((sum, loan) => sum + loan.totalAmount, 0)
-  const totalPaid = customer.loans.reduce((sum, loan) => sum + loan.paidAmount, 0)
-  const totalOutstanding = customer.loans.reduce((sum, loan) => sum + loan.remainingAmount, 0)
+  const totalBorrowed = customer.totalBorrowed || 0;
+  const totalPaid = customer.totalPaid || 0;
+  const totalOutstanding = customer.outstandingBalance || 0;
 
   return (
     <div className="space-y-6">
@@ -182,13 +88,13 @@ export default function CustomerDetailPage({ customerId }) {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold">{customer.personalInfo.name}</h1>
+            <h1 className="text-3xl font-bold">{customer.name}</h1>
             <p className="text-muted-foreground">{customer.id}</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Badge variant={customer.creditInfo.status === "Active" ? "default" : "destructive"}>
-            {customer.creditInfo.status}
+          <Badge variant={customer.status === "Active" ? "default" : "destructive"}>
+            {customer.status}
           </Badge>
           <EditCustomerModal customer={customer} />
         </div>
@@ -202,10 +108,10 @@ export default function CustomerDetailPage({ customerId }) {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${getCreditScoreColor(customer.creditInfo.creditScore)}`}>
-              {customer.creditInfo.creditScore}
+            <div className={`text-2xl font-bold ${getCreditScoreColor(customer.creditScore)}`}>
+              {customer.creditScore}
             </div>
-            <p className="text-xs text-muted-foreground">{customer.creditInfo.creditHistory}</p>
+            <p className="text-xs text-muted-foreground">{/* customer.creditHistory */}</p>
           </CardContent>
         </Card>
 
@@ -215,8 +121,8 @@ export default function CustomerDetailPage({ customerId }) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">NGN {totalBorrowed.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">{customer.loans.length} loans</p>
+            <div className="text-2xl font-bold">NGN {totalBorrowed}</div>
+            <p className="text-xs text-muted-foreground">{customer.totalLoans} loans</p>
           </CardContent>
         </Card>
 
@@ -226,8 +132,8 @@ export default function CustomerDetailPage({ customerId }) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">NGN {totalOutstanding.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">{((totalPaid / totalBorrowed) * 100).toFixed(1)}% paid</p>
+            <div className="text-2xl font-bold">NGN {totalOutstanding}</div>
+            <p className="text-xs text-muted-foreground">{((totalPaid / totalBorrowed) * 100)}% paid</p>
           </CardContent>
         </Card>
 
@@ -237,9 +143,9 @@ export default function CustomerDetailPage({ customerId }) {
             <Smartphone className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{customer.devices.length}</div>
+            <div className="text-2xl font-bold">{customer.devices}</div>
             <p className="text-xs text-muted-foreground">
-              {customer.devices.filter((d) => d.status === "Active").length} active
+              {/* customer.devices.filter((d) => d.status === "Active").length */} active
             </p>
           </CardContent>
         </Card>
@@ -266,32 +172,24 @@ export default function CustomerDetailPage({ customerId }) {
                   <CardContent className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Full Name:</span>
-                      <span className="text-sm font-medium">{customer.personalInfo.name}</span>
+                      <span className="text-sm font-medium">{customer.name}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">ID Number:</span>
-                      <span className="text-sm font-medium">{customer.personalInfo.idNumber}</span>
+                      <span className="text-sm font-medium">{customer.idNumber}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Date of Birth:</span>
-                      <span className="text-sm font-medium">{customer.personalInfo.dateOfBirth}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Gender:</span>
-                      <span className="text-sm font-medium">{customer.personalInfo.gender}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-muted-foreground">Marital Status:</span>
-                      <span className="text-sm font-medium">{customer.personalInfo.maritalStatus}</span>
+                      <span className="text-sm text-muted-foreground">Join Date:</span>
+                      <span className="text-sm font-medium">{new Date(customer.joinDate).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Occupation:</span>
-                      <span className="text-sm font-medium">{customer.personalInfo.occupation}</span>
+                      <span className="text-sm font-medium">{customer.occupation}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Monthly Income:</span>
                       <span className="text-sm font-medium">
-                        NGN {customer.personalInfo.monthlyIncome.toLocaleString()}
+                        NGN {customer.monthly_income ? parseFloat(customer.monthly_income) : 0}
                       </span>
                     </div>
                   </CardContent>
@@ -305,23 +203,17 @@ export default function CustomerDetailPage({ customerId }) {
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <Phone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{customer.personalInfo.phone}</span>
+                        <span className="text-sm">{customer.phone}</span>
                       </div>
-                      {customer.personalInfo.alternatePhone && (
-                        <div className="flex items-center space-x-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{customer.personalInfo.alternatePhone}</span>
-                        </div>
-                      )}
                       <div className="flex items-center space-x-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{customer.personalInfo.email}</span>
+                        <span className="text-sm">{customer.email}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <MapPin className="h-4 w-4 text-muted-foreground" />
                         <div>
-                          <div className="text-sm">{customer.address.location}</div>
-                          <div className="text-xs text-muted-foreground">{customer.address.county}</div>
+                          <div className="text-sm">{customer.location}</div>
+                          <div className="text-xs text-muted-foreground">{customer.county}</div>
                         </div>
                       </div>
                     </div>
@@ -329,12 +221,12 @@ export default function CustomerDetailPage({ customerId }) {
                     <div className="pt-3 border-t">
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Ward:</span>
-                          <span>{customer.address.ward}</span>
+                          <span className="text-muted-foreground">Landmark:</span>
+                          <span>{customer.landmark}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-muted-foreground">Landmark:</span>
-                          <span>{customer.address.nearestLandmark}</span>
+                          <span className="text-muted-foreground">GPS Coordinates:</span>
+                          <span>{customer.gps}</span>
                         </div>
                       </div>
                     </div>
@@ -361,7 +253,7 @@ export default function CustomerDetailPage({ customerId }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {customer.loans.map((loan) => (
+                      {customer.loans && customer.loans.map((loan) => (
                         <TableRow key={loan.id}>
                           <TableCell>
                             <Link href={`/loans/${loan.id}`} className="text-blue-600 hover:underline">
@@ -376,16 +268,16 @@ export default function CustomerDetailPage({ customerId }) {
                           </TableCell>
                           <TableCell>
                             <div>
-                              <div className="font-medium">NGN {loan.totalAmount.toLocaleString()}</div>
+                              <div className="font-medium">NGN {loan.totalAmount}</div>
                               <div className="text-sm text-muted-foreground">
-                                Remaining: NGN {loan.remainingAmount.toLocaleString()}
+                                Remaining: NGN {loan.remainingAmount}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="space-y-2">
                               <Progress value={loan.progress} className="w-[60px]" />
-                              <div className="text-xs text-muted-foreground">{loan.progress.toFixed(1)}%</div>
+                              <div className="text-xs text-muted-foreground">{loan.progress}%</div>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -418,7 +310,7 @@ export default function CustomerDetailPage({ customerId }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {customer.devices.map((device) => (
+                      {customer.devices && customer.devices.map((device) => (
                         <TableRow key={device.id}>
                           <TableCell>
                             <Link href={`/devices/${device.id}`} className="text-blue-600 hover:underline">
@@ -463,10 +355,10 @@ export default function CustomerDetailPage({ customerId }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {customer.paymentHistory.map((payment) => (
+                      {customer.paymentHistory && customer.paymentHistory.map((payment) => (
                         <TableRow key={payment.id}>
                           <TableCell>{payment.date}</TableCell>
-                          <TableCell>NGN {payment.amount.toLocaleString()}</TableCell>
+                          <TableCell>NGN {payment.amount}</TableCell>
                           <TableCell>{payment.method}</TableCell>
                           <TableCell>{payment.reference}</TableCell>
                           <TableCell>
@@ -494,7 +386,7 @@ export default function CustomerDetailPage({ customerId }) {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {customer.recentActivities.map((activity) => (
+                    {customer.recentActivities && customer.recentActivities.map((activity) => (
                       <div key={activity.id} className="flex items-start space-x-3">
                         <div className="mt-1">
                           {activity.status === "success" && <CheckCircle className="h-4 w-4 text-green-500" />}

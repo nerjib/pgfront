@@ -135,12 +135,12 @@ export function CustomerQuickActions({ customer, onAction, isLoading }) {
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Status:</span>
             <div className="flex items-center space-x-1">
-              {customer.creditInfo.status === "Active" ? (
+              {customer?.creditInfo?.status === "Active" ? (
                 <UserCheck className="h-4 w-4 text-green-500" />
               ) : (
                 <AlertTriangle className="h-4 w-4 text-red-500" />
               )}
-              <span className="text-sm font-medium">{customer.creditInfo.status}</span>
+              <span className="text-sm font-medium">{customer?.creditInfo?.status}</span>
             </div>
           </div>
 
@@ -148,18 +148,18 @@ export function CustomerQuickActions({ customer, onAction, isLoading }) {
             <span className="text-sm text-muted-foreground">Credit Score:</span>
             <div className="flex items-center space-x-1">
               <TrendingUp className="h-4 w-4" />
-              <span className="text-sm font-medium">{customer.creditInfo.creditScore}</span>
+              <span className="text-sm font-medium">{customer?.creditInfo?.creditScore}</span>
             </div>
           </div>
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Risk Level:</span>
-            <span className="text-sm font-medium">{customer.creditInfo.riskLevel}</span>
+            <span className="text-sm font-medium">{customer?.creditInfo?.riskLevel}</span>
           </div>
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Member Since:</span>
-            <span className="text-sm font-medium">{customer.creditInfo.joinDate}</span>
+            <span className="text-sm font-medium">{customer?.creditInfo?.joinDate}</span>
           </div>
         </CardContent>
       </Card>
