@@ -12,35 +12,31 @@ import Link from "next/link"
 import { useState, useEffect } from "react";
 import https from "@/services/https";
 
-// ... (imports)
-
 export default function AgentsPage() {
   const [agentsData, setAgentsData] = useState([]);
 
-  useEffect(() => {
-    const fetchAgents = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${https.baseUrl}/agents`, {
-          headers: {
-            "x-auth-token": token,
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch agents");
-        }
-        const data = await response.json();
-        setAgentsData(data);
-      } catch (error) {
-        console.error("Error fetching agents:", error);
+  const fetchAgents = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/agents`, {
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch agents");
       }
-    };
+      const data = await response.json();
+      setAgentsData(data);
+    } catch (error) {
+      console.error("Error fetching agents:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchAgents();
   }, []);
 
-  // ... (rest of the component)
-// }
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -48,7 +44,7 @@ export default function AgentsPage() {
           <h1 className="text-3xl font-bold">Agents</h1>
           <p className="text-muted-foreground">Manage your field agents and sales representatives</p>
         </div>
-        <AddAgentModal />
+        <AddAgentModal onAgentAdded={fetchAgents} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -57,8 +53,8 @@ export default function AgentsPage() {
             <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
+            <div className="text-2xl font-bold">{agentsData.length}</div>
+            <p className="text-xs text-muted-foreground">{/* Dynamic data */}</p>
           </CardContent>
         </Card>
         <Card>
@@ -66,8 +62,8 @@ export default function AgentsPage() {
             <CardTitle className="text-sm font-medium">Active Agents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
-            <p className="text-xs text-muted-foreground">75% active rate</p>
+            <div className="text-2xl font-bold">{agentsData.filter(agent => agent.status === 'Active').length}</div>
+            <p className="text-xs text-muted-foreground">{/* Dynamic data */}</p>
           </CardContent>
         </Card>
         <Card>
@@ -75,8 +71,8 @@ export default function AgentsPage() {
             <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">NGN 2.4M</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <div className="text-2xl font-bold">NGN {agentsData.reduce((acc, agent) => acc + (parseFloat(agent.totalSales) || 0), 0).toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">{/* Dynamic data */}</p>
           </CardContent>
         </Card>
         <Card>
@@ -84,8 +80,8 @@ export default function AgentsPage() {
             <CardTitle className="text-sm font-medium">Devices Managed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,247</div>
-            <p className="text-xs text-muted-foreground">+8% from last month</p>
+            <div className="text-2xl font-bold">{agentsData.reduce((acc, agent) => acc + (agent.devicesManaged || 0), 0)}</div>
+            <p className="text-xs text-muted-foreground">{/* Dynamic data */}</p>
           </CardContent>
         </Card>
       </div>
@@ -150,8 +146,8 @@ export default function AgentsPage() {
                     <Badge variant={agent.status === "Active" ? "default" : "secondary"}>{agent.status}</Badge>
                   </TableCell>
                   <TableCell>{agent.devicesManaged}</TableCell>
-                  <TableCell>NGN {agent.totalSales}</TableCell>
-                  <TableCell>{agent.last_active}</TableCell>
+                  <TableCell>NGN {agent.totalSales ? parseFloat(agent.totalSales).toLocaleString() : 0}</TableCell>
+                  <TableCell>{agent.last_active ? new Date(agent.last_active).toLocaleString() : 'N/A'}</TableCell>
                   <TableCell>
                     <Link href={`/agents/${agent.id}`}>
                       <Button variant="outline" size="sm">
