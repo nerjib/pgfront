@@ -101,7 +101,8 @@ export function LoanQuickActions({ loan, onAction, isLoading }) {
                   loan={{
                     id: loan.loan_id,
                     loanNumber: loan.loan_id,
-                    customer: { name: loan.customer.name },
+                    customer: { name: loan.customer.name, id: loan.customer.id  },
+                    monthlyPayment: loan.monthlyPayment,
                     loanDetails: {
                       remainingAmount: loan.remainingAmount,
                       monthlyPayment: loan.monthlyPayment,

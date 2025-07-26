@@ -1,5 +1,7 @@
 import LoanDetailPage from "../../../components/loan-detail-page"
 
-export default function LoanPage({ params }) {
-  return <LoanDetailPage loanId={params.id} />
+
+export default async function LoanPage({ params }) {
+  const resolvedParams = await params; // Await params as suggested by the error
+  return <LoanDetailPage loanId={resolvedParams.id} />;
 }

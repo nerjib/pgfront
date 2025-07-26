@@ -28,6 +28,7 @@ import Link from "next/link"
 import { EditLoanModal } from "./modals/edit-loan-modal"
 import { LoanQuickActions } from "./loan-quick-actions"
 import https from "@/services/https";
+import { QuickRecordPayment } from "./quick-record-payment"
 
 export default function LoanDetailPage({ loanId }) {
   const [loan, setLoan] = useState(null);
@@ -432,6 +433,12 @@ export default function LoanDetailPage({ loanId }) {
 
         {/* Quick Actions Sidebar */}
         <LoanQuickActions loan={loan} onAction={handleLoanAction} isLoading={isLoading} />
+        {/* <QuickRecordPayment
+          loan={loan}
+          onPaymentRecorded={fetchLoanData}
+          size="default"
+          variant="default"
+        /> */}
       </div>
     </div>
   )

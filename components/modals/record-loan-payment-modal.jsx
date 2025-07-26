@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,37 +16,54 @@ import { Label } from "@/components/ui/label"
 import { DollarSign } from "lucide-react"
 import https from "@/services/https";
 import { toast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 
-export function RecordLoanPaymentModal({ customerId }) {
+
+export function RecordLoanPaymentModal({ loan, onPaymentRecorded }) {
   const [amount, setAmount] = useState("");
-  const [loanId, setLoanId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const handleRecordPayment = async () => {
+    if (parseFloat(amount) < loan.monthlyPayment) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Amount",
+        text: "Amount must be at least the monthly payment of NGN " + loan.monthlyPayment.toLocaleString() + ".",
+      })
+      toast({
+        title: "Payment Error",
+        description: `Amount must be at least the monthly payment of NGN ${loan.monthlyPayment.toLocaleString()}.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`${https.baseUrl}/loans/${loanId}/payments`, {
+      const response = await fetch(`${https.baseUrl}/payments/manual`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "x-auth-token": token,
         },
-        body: JSON.stringify({ amount: parseFloat(amount), customerId }),
+        body: JSON.stringify({
+          user_id: loan.customer.id,
+          amount: parseFloat(amount),
+          loan_id: loan.id,
+          payment_method: "manual",
+        }),
       });
 
       if (!response.ok) {
         throw new Error("Failed to record payment");
       }
-
+      
       toast({
         title: "Payment Recorded",
-        description: `Successfully recorded NGN ${amount} for loan ${loanId}.`,
+        description: `Successfully recorded NGN ${amount} for loan ${loan.loan_id}.`,
       });
       setAmount("");
-      setLoanId("");
-      // Optionally, refresh customer/loan data on parent component
-    } catch (error) {
+      onPaymentRecorded();
       console.error("Error recording payment:", error);
       toast({
         title: "Payment Failed",
@@ -74,18 +91,6 @@ export function RecordLoanPaymentModal({ customerId }) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="loanId" className="text-right">
-              Loan ID
-            </Label>
-            <Input
-              id="loanId"
-              value={loanId}
-              onChange={(e) => setLoanId(e.target.value)}
-              className="col-span-3"
-              placeholder="e.g., LOAN123"
-            />
-          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="amount" className="text-right">
               Amount
