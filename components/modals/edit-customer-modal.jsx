@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,31 +16,77 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Edit } from "lucide-react"
+import https from "@/services/https";
+import { toast } from "@/hooks/use-toast";
 
 export function EditCustomerModal({ customer, onUpdate }) {
   const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: customer?.personalInfo?.name || "",
-    email: customer?.personalInfo?.email || "",
-    phone: customer?.personalInfo?.phone || "",
-    alternatePhone: customer?.personalInfo?.alternatePhone || "",
-    idNumber: customer?.personalInfo?.idNumber || "",
-    occupation: customer?.personalInfo?.occupation || "",
-    monthlyIncome: customer?.personalInfo?.monthlyIncome || "",
-    location: customer?.address?.location || "",
-    county: customer?.address?.county || "",
-    status: customer?.creditInfo?.status || "Active",
-    notes: "",
+    name: customer?.name || "",
+    email: customer?.email || "",
+    phone: customer?.phone || "",
+    idNumber: customer?.idNumber || "",
+    occupation: customer?.occupation || "",
+    monthly_income: customer?.monthly_income || "",
+    location: customer?.location || "",
+    county: customer?.county || "",
+    status: customer?.status || "Active",
   })
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log("Updating customer:", formData)
-    if (onUpdate) {
-      onUpdate(formData)
+  useEffect(() => {
+    if (customer) {
+      setFormData({
+        name: customer.name || "",
+        email: customer.email || "",
+        phone: customer.phone || "",
+        idNumber: customer.idNumber || "",
+        occupation: customer.occupation || "",
+        monthly_income: customer.monthly_income || "",
+        location: customer.location || "",
+        county: customer.county || "",
+        status: customer.status || "Active",
+      });
     }
-    setOpen(false)
-  }
+  }, [customer]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/customers/${customer.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update customer");
+      }
+
+      toast({
+        title: "Customer Updated",
+        description: `Customer ${formData.name} has been updated successfully.`,
+      });
+      setOpen(false);
+      if (onUpdate) {
+        onUpdate(); // Trigger refresh in parent component
+      }
+    } catch (error) {
+      console.error("Error updating customer:", error);
+      toast({
+        title: "Update Failed",
+        description: "There was an error updating the customer. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -113,14 +159,6 @@ export function EditCustomerModal({ customer, onUpdate }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="alternatePhone">Alternate Phone</Label>
-                <Input
-                  id="alternatePhone"
-                  value={formData.alternatePhone}
-                  onChange={(e) => handleInputChange("alternatePhone", e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="idNumber">ID Number *</Label>
                 <Input
                   id="idNumber"
@@ -129,9 +167,6 @@ export function EditCustomerModal({ customer, onUpdate }) {
                   required
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="occupation">Occupation</Label>
                 <Input
@@ -140,18 +175,18 @@ export function EditCustomerModal({ customer, onUpdate }) {
                   onChange={(e) => handleInputChange("occupation", e.target.value)}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="monthlyIncome">Monthly Income (NGN)</Label>
-                <Input
-                  id="monthlyIncome"
-                  type="number"
-                  value={formData.monthlyIncome}
-                  onChange={(e) => handleInputChange("monthlyIncome", e.target.value)}
-                />
-              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="monthly_income">Monthly Income (NGN)</Label>
+                <Input
+                  id="monthly_income"
+                  type="number"
+                  value={formData.monthly_income}
+                  onChange={(e) => handleInputChange("monthly_income", e.target.value)}
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="location">Location *</Label>
                 <Input
@@ -161,41 +196,36 @@ export function EditCustomerModal({ customer, onUpdate }) {
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="county">County *</Label>
-                <Select value={formData.county} onValueChange={(value) => handleInputChange("county", value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Nairobi">Nairobi</SelectItem>
-                    <SelectItem value="Kisumu">Kisumu</SelectItem>
-                    <SelectItem value="Mombasa">Mombasa</SelectItem>
-                    <SelectItem value="Uasin Gishu">Uasin Gishu</SelectItem>
-                    <SelectItem value="Nakuru">Nakuru</SelectItem>
-                    <SelectItem value="Kiambu">Kiambu</SelectItem>
-                    <SelectItem value="Machakos">Machakos</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => handleInputChange("notes", e.target.value)}
-                placeholder="Additional customer notes..."
-                rows={3}
-              />
+              <Label htmlFor="county">County *</Label>
+              <Select value={formData.county} onValueChange={(value) => handleInputChange("county", value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Nairobi">Nairobi</SelectItem>
+                  <SelectItem value="Kisumu">Kisumu</SelectItem>
+                  <SelectItem value="Mombasa">Mombasa</SelectItem>
+                  <SelectItem value="Uasin Gishu">Uasin Gishu</SelectItem>
+                  <SelectItem value="Nakuru">Nakuru</SelectItem>
+                  <SelectItem value="Kiambu">Kiambu</SelectItem>
+                  <SelectItem value="Machakos">Machakos</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {/* Removed alternatePhone and notes as they are not in the customer object from the backend */}
+
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit">Update Customer</Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Updating..." : "Update Customer"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

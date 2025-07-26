@@ -32,37 +32,37 @@ export default function CustomerDetailPage({ customerId }) {
   const [loans, setLoans] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchCustomerData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const customerResponse = await fetch(`${https.baseUrl}/customers/${customerId}`, {
-          headers: {
-            "x-auth-token": token,
-          },
-        });
-        if (!customerResponse.ok) {
-          throw new Error("Failed to fetch customer data");
-        }
-        const customerData = await customerResponse.json();
-        setCustomer(customerData);
-
-        const loansResponse = await fetch(`${https.baseUrl}/loans/customer/${customerId}`, {
-          headers: {
-            "x-auth-token": token,
-          },
-        });
-        if (!loansResponse.ok) {
-          throw new Error("Failed to fetch loans data");
-        }
-        const loansData = await loansResponse.json();
-        setLoans(loansData);
-
-      } catch (error) {
-        console.error("Error fetching customer data:", error);
+  const fetchCustomerData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const customerResponse = await fetch(`${https.baseUrl}/customers/${customerId}`, {
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!customerResponse.ok) {
+        throw new Error("Failed to fetch customer data");
       }
-    };
+      const customerData = await customerResponse.json();
+      setCustomer(customerData);
 
+      const loansResponse = await fetch(`${https.baseUrl}/loans/customer/${customerId}`, {
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!loansResponse.ok) {
+        throw new Error("Failed to fetch loans data");
+      }
+      const loansData = await loansResponse.json();
+      setLoans(loansData);
+
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+    }
+  };
+
+  useEffect(() => {
     if (customerId) {
       fetchCustomerData();
     }
@@ -110,7 +110,7 @@ export default function CustomerDetailPage({ customerId }) {
           <Badge variant={customer.status === "Active" ? "default" : "destructive"}>
             {customer.status}
           </Badge>
-          <EditCustomerModal customer={customer} />
+          <EditCustomerModal customer={customer} onUpdate={fetchCustomerData} />
         </div>
       </div>
 
