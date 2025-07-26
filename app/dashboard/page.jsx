@@ -32,7 +32,7 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">KES 2.4M</div>
+            <div className="text-2xl font-bold">NGN 2.4M</div>
             <p className="text-xs text-muted-foreground">+12% from last month</p>
           </CardContent>
         </Card>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
                     <p className="text-xs text-muted-foreground">{transaction.time}</p>
                   </div>
                   <div className="text-right space-y-1">
-                    <p className="text-sm font-medium">KES {transaction.amount.toLocaleString()}</p>
+                    <p className="text-sm font-medium">NGN {transaction.amount.toLocaleString()}</p>
                     <Badge variant={transaction.status === "Completed" ? "default" : "destructive"} className="text-xs">
                       {transaction.status}
                     </Badge>
@@ -150,7 +150,7 @@ export default function DashboardPage() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">KES 1.8M</div>
+            <div className="text-2xl font-bold">NGN 1.8M</div>
             <p className="text-xs text-muted-foreground">892 active loans</p>
           </CardContent>
         </Card>

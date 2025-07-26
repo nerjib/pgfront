@@ -29,7 +29,7 @@ export function PaymentSuccessNotification({ payment, onClose, duration = 5000 }
               <div className="flex-1">
                 <h4 className="font-medium text-green-900">Payment Recorded Successfully!</h4>
                 <div className="mt-2 text-sm text-green-800 space-y-1">
-                  <p>Amount: KES {Number.parseFloat(payment.amount).toLocaleString()}</p>
+                  <p>Amount: NGN {Number.parseFloat(payment.amount).toLocaleString()}</p>
                   <p>Method: {payment.paymentMethod}</p>
                   {payment.reference && <p>Reference: {payment.reference}</p>}
                   <p>Date: {payment.paymentDate}</p>

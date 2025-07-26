@@ -69,7 +69,7 @@ export function RecordPaymentModal({ loan, onPaymentRecorded }) {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="amount">Amount (KES) *</Label>
+                <Label htmlFor="amount">Amount (NGN) *</Label>
                 <Input
                   id="amount"
                   type="number"
@@ -116,7 +116,7 @@ export function RecordPaymentModal({ loan, onPaymentRecorded }) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lateFee">Late Fee (KES)</Label>
+                <Label htmlFor="lateFee">Late Fee (NGN)</Label>
                 <Input
                   id="lateFee"
                   type="number"

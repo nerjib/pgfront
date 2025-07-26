@@ -63,7 +63,7 @@ export function EditLoanModal({ loan, onUpdate }) {
           <div className="grid gap-4 py-4 max-h-[500px] overflow-y-auto">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="principalAmount">Principal Amount (KES) *</Label>
+                <Label htmlFor="principalAmount">Principal Amount (NGN) *</Label>
                 <Input
                   id="principalAmount"
                   type="number"
@@ -97,7 +97,7 @@ export function EditLoanModal({ loan, onUpdate }) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="monthlyPayment">Monthly Payment (KES) *</Label>
+                <Label htmlFor="monthlyPayment">Monthly Payment (NGN) *</Label>
                 <Input
                   id="monthlyPayment"
                   type="number"

@@ -176,7 +176,7 @@ export function AddCustomerModal() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="monthlyIncome">Monthly Income (KES)</Label>
+                <Label htmlFor="monthlyIncome">Monthly Income (NGN)</Label>
                 <Input
                   id="monthlyIncome"
                   type="number"

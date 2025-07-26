@@ -75,7 +75,7 @@ const getDeviceData = (deviceId) => {
       {
         id: 2,
         type: "payment",
-        message: "Payment received: KES 2,500",
+        message: "Payment received: NGN 2,500",
         timestamp: "2024-02-28 09:15",
         status: "success",
       },
@@ -184,7 +184,7 @@ export default function DeviceDetailPage({ deviceId }) {
           <CardContent>
             <div className="text-2xl font-bold">{loanProgress.toFixed(1)}%</div>
             <Progress value={loanProgress} className="mt-2" />
-            <p className="text-xs text-muted-foreground mt-1">KES {device.loan.remaining.toLocaleString()} remaining</p>
+            <p className="text-xs text-muted-foreground mt-1">NGN {device.loan.remaining.toLocaleString()} remaining</p>
           </CardContent>
         </Card>
       </div>
@@ -296,15 +296,15 @@ export default function DeviceDetailPage({ deviceId }) {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Loan Amount:</span>
-                        <span className="text-sm font-medium">KES {device.loan.amount.toLocaleString()}</span>
+                        <span className="text-sm font-medium">NGN {device.loan.amount.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Amount Paid:</span>
-                        <span className="text-sm font-medium">KES {device.loan.paid.toLocaleString()}</span>
+                        <span className="text-sm font-medium">NGN {device.loan.paid.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Remaining:</span>
-                        <span className="text-sm font-medium">KES {device.loan.remaining.toLocaleString()}</span>
+                        <span className="text-sm font-medium">NGN {device.loan.remaining.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Next Payment:</span>

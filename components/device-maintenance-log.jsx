@@ -94,7 +94,7 @@ export function DeviceMaintenanceLog({ deviceId }) {
                     {record.status}
                   </Badge>
                 </TableCell>
-                <TableCell>{record.cost > 0 ? `KES ${record.cost.toLocaleString()}` : "-"}</TableCell>
+                <TableCell>{record.cost > 0 ? `NGN ${record.cost.toLocaleString()}` : "-"}</TableCell>
               </TableRow>
             ))}
           </TableBody>

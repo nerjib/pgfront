@@ -191,7 +191,7 @@ export function LoanQuickActions({ loan, onAction, isLoading }) {
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Remaining:</span>
-            <span className="text-sm font-medium">KES {loan.loanDetails.remainingAmount.toLocaleString()}</span>
+            <span className="text-sm font-medium">NGN {loan.loanDetails.remainingAmount.toLocaleString()}</span>
           </div>
         </CardContent>
       </Card>

@@ -149,7 +149,7 @@ export function EditAgentModal({ agent, onUpdate }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="salary">Base Salary (KES)</Label>
+                <Label htmlFor="salary">Base Salary (NGN)</Label>
                 <Input
                   id="salary"
                   type="number"

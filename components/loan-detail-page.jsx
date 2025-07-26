@@ -134,7 +134,7 @@ const getLoanData = (loanId) => {
       {
         id: 1,
         type: "payment",
-        message: "Payment received: KES 2,500",
+        message: "Payment received: NGN 2,500",
         timestamp: "2024-02-28 09:15",
         status: "success",
       },
@@ -222,7 +222,7 @@ export default function LoanDetailPage({ loanId }) {
             <div className="text-2xl font-bold">{loanProgress.toFixed(1)}%</div>
             <Progress value={loanProgress} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-1">
-              KES {loan.loanDetails.remainingAmount.toLocaleString()} remaining
+              NGN {loan.loanDetails.remainingAmount.toLocaleString()} remaining
             </p>
           </CardContent>
         </Card>
@@ -233,8 +233,8 @@ export default function LoanDetailPage({ loanId }) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">KES {loan.loanDetails.paidAmount.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">of KES {loan.loanDetails.totalAmount.toLocaleString()}</p>
+            <div className="text-2xl font-bold">NGN {loan.loanDetails.paidAmount.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">of NGN {loan.loanDetails.totalAmount.toLocaleString()}</p>
           </CardContent>
         </Card>
 
@@ -244,7 +244,7 @@ export default function LoanDetailPage({ loanId }) {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">KES {loan.loanDetails.monthlyPayment.toLocaleString()}</div>
+            <div className="text-2xl font-bold">NGN {loan.loanDetails.monthlyPayment.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Due: {loan.loanDetails.nextPaymentDate}</p>
           </CardContent>
         </Card>
@@ -284,7 +284,7 @@ export default function LoanDetailPage({ loanId }) {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Principal Amount:</span>
                       <span className="text-sm font-medium">
-                        KES {loan.loanDetails.principalAmount.toLocaleString()}
+                        NGN {loan.loanDetails.principalAmount.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -298,7 +298,7 @@ export default function LoanDetailPage({ loanId }) {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Monthly Payment:</span>
                       <span className="text-sm font-medium">
-                        KES {loan.loanDetails.monthlyPayment.toLocaleString()}
+                        NGN {loan.loanDetails.monthlyPayment.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -399,7 +399,7 @@ export default function LoanDetailPage({ loanId }) {
                       {loan.paymentHistory.map((payment) => (
                         <TableRow key={payment.id}>
                           <TableCell>{payment.date}</TableCell>
-                          <TableCell>KES {payment.amount.toLocaleString()}</TableCell>
+                          <TableCell>NGN {payment.amount.toLocaleString()}</TableCell>
                           <TableCell>{payment.method}</TableCell>
                           <TableCell>{payment.reference}</TableCell>
                           <TableCell>
@@ -407,7 +407,7 @@ export default function LoanDetailPage({ loanId }) {
                               {payment.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{payment.lateFee > 0 ? `KES ${payment.lateFee.toLocaleString()}` : "-"}</TableCell>
+                          <TableCell>{payment.lateFee > 0 ? `NGN ${payment.lateFee.toLocaleString()}` : "-"}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -438,9 +438,9 @@ export default function LoanDetailPage({ loanId }) {
                         <TableRow key={installment.installment}>
                           <TableCell>{installment.installment}</TableCell>
                           <TableCell>{installment.dueDate}</TableCell>
-                          <TableCell>KES {installment.principalAmount.toLocaleString()}</TableCell>
-                          <TableCell>KES {installment.interestAmount.toLocaleString()}</TableCell>
-                          <TableCell>KES {installment.totalAmount.toLocaleString()}</TableCell>
+                          <TableCell>NGN {installment.principalAmount.toLocaleString()}</TableCell>
+                          <TableCell>NGN {installment.interestAmount.toLocaleString()}</TableCell>
+                          <TableCell>NGN {installment.totalAmount.toLocaleString()}</TableCell>
                           <TableCell>
                             <Badge
                               variant={

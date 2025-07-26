@@ -119,7 +119,7 @@ const getCustomerData = (customerId) => {
       {
         id: 1,
         type: "payment",
-        message: "Payment received: KES 2,500",
+        message: "Payment received: NGN 2,500",
         timestamp: "2024-02-28 09:15",
         status: "success",
       },
@@ -215,7 +215,7 @@ export default function CustomerDetailPage({ customerId }) {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">KES {totalBorrowed.toLocaleString()}</div>
+            <div className="text-2xl font-bold">NGN {totalBorrowed.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">{customer.loans.length} loans</p>
           </CardContent>
         </Card>
@@ -226,7 +226,7 @@ export default function CustomerDetailPage({ customerId }) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">KES {totalOutstanding.toLocaleString()}</div>
+            <div className="text-2xl font-bold">NGN {totalOutstanding.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">{((totalPaid / totalBorrowed) * 100).toFixed(1)}% paid</p>
           </CardContent>
         </Card>
@@ -291,7 +291,7 @@ export default function CustomerDetailPage({ customerId }) {
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Monthly Income:</span>
                       <span className="text-sm font-medium">
-                        KES {customer.personalInfo.monthlyIncome.toLocaleString()}
+                        NGN {customer.personalInfo.monthlyIncome.toLocaleString()}
                       </span>
                     </div>
                   </CardContent>
@@ -376,9 +376,9 @@ export default function CustomerDetailPage({ customerId }) {
                           </TableCell>
                           <TableCell>
                             <div>
-                              <div className="font-medium">KES {loan.totalAmount.toLocaleString()}</div>
+                              <div className="font-medium">NGN {loan.totalAmount.toLocaleString()}</div>
                               <div className="text-sm text-muted-foreground">
-                                Remaining: KES {loan.remainingAmount.toLocaleString()}
+                                Remaining: NGN {loan.remainingAmount.toLocaleString()}
                               </div>
                             </div>
                           </TableCell>
@@ -466,7 +466,7 @@ export default function CustomerDetailPage({ customerId }) {
                       {customer.paymentHistory.map((payment) => (
                         <TableRow key={payment.id}>
                           <TableCell>{payment.date}</TableCell>
-                          <TableCell>KES {payment.amount.toLocaleString()}</TableCell>
+                          <TableCell>NGN {payment.amount.toLocaleString()}</TableCell>
                           <TableCell>{payment.method}</TableCell>
                           <TableCell>{payment.reference}</TableCell>
                           <TableCell>

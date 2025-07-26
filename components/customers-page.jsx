@@ -263,7 +263,7 @@ export default function CustomersPage() {
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium">KES {customer.outstandingBalance.toLocaleString()}</div>
+                      <div className="font-medium">NGN {customer.outstandingBalance.toLocaleString()}</div>
                       {customer.outstandingBalance > 0 && (
                         <div className="text-xs text-muted-foreground">Next: {customer.nextPaymentDue}</div>
                       )}

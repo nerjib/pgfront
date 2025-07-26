@@ -147,11 +147,11 @@ export function RecordLoanPaymentModal({ loan, onPaymentRecorded, trigger }) {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Outstanding Balance:</span>
-                    <span className="font-medium">KES {loan?.loanDetails?.remainingAmount?.toLocaleString()}</span>
+                    <span className="font-medium">NGN {loan?.loanDetails?.remainingAmount?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Monthly Payment:</span>
-                    <span className="font-medium">KES {loan?.loanDetails?.monthlyPayment?.toLocaleString()}</span>
+                    <span className="font-medium">NGN {loan?.loanDetails?.monthlyPayment?.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Next Due Date:</span>
@@ -171,7 +171,7 @@ export function RecordLoanPaymentModal({ loan, onPaymentRecorded, trigger }) {
             <div className="grid gap-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Payment Amount (KES) *</Label>
+                  <Label htmlFor="amount">Payment Amount (NGN) *</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -233,7 +233,7 @@ export function RecordLoanPaymentModal({ loan, onPaymentRecorded, trigger }) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lateFee">Late Fee (KES)</Label>
+                  <Label htmlFor="lateFee">Late Fee (NGN)</Label>
                   <Input
                     id="lateFee"
                     type="number"
@@ -246,7 +246,7 @@ export function RecordLoanPaymentModal({ loan, onPaymentRecorded, trigger }) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="earlyPaymentDiscount">Early Payment Discount (KES)</Label>
+                <Label htmlFor="earlyPaymentDiscount">Early Payment Discount (NGN)</Label>
                 <Input
                   id="earlyPaymentDiscount"
                   type="number"
@@ -283,25 +283,25 @@ export function RecordLoanPaymentModal({ loan, onPaymentRecorded, trigger }) {
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Principal Amount:</span>
                       <span className="font-medium">
-                        KES {Number.parseFloat(calculatedValues.principalAmount).toLocaleString()}
+                        NGN {Number.parseFloat(calculatedValues.principalAmount).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Interest Amount:</span>
                       <span className="font-medium">
-                        KES {Number.parseFloat(calculatedValues.interestAmount).toLocaleString()}
+                        NGN {Number.parseFloat(calculatedValues.interestAmount).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Late Fee:</span>
                       <span className="font-medium">
-                        KES {Number.parseFloat(formData.lateFee || 0).toLocaleString()}
+                        NGN {Number.parseFloat(formData.lateFee || 0).toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Early Payment Discount:</span>
                       <span className="font-medium text-green-600">
-                        -KES {Number.parseFloat(formData.earlyPaymentDiscount || 0).toLocaleString()}
+                        -NGN {Number.parseFloat(formData.earlyPaymentDiscount || 0).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -310,13 +310,13 @@ export function RecordLoanPaymentModal({ loan, onPaymentRecorded, trigger }) {
 
                   <div className="flex justify-between font-medium">
                     <span>Total Payment:</span>
-                    <span>KES {Number.parseFloat(calculatedValues.totalWithFees).toLocaleString()}</span>
+                    <span>NGN {Number.parseFloat(calculatedValues.totalWithFees).toLocaleString()}</span>
                   </div>
 
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Remaining Balance After Payment:</span>
                     <span className="font-medium">
-                      KES {Number.parseFloat(calculatedValues.remainingBalance).toLocaleString()}
+                      NGN {Number.parseFloat(calculatedValues.remainingBalance).toLocaleString()}
                     </span>
                   </div>
                 </CardContent>

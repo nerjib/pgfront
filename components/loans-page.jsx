@@ -168,9 +168,9 @@ export default function LoansPage() {
                     <TableCell>{loan.customer}</TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">KES {loan.loanAmount.toLocaleString()}</div>
+                        <div className="font-medium">NGN {loan.loanAmount.toLocaleString()}</div>
                         <div className="text-sm text-muted-foreground">
-                          Remaining: KES {loan.remainingAmount.toLocaleString()}
+                          Remaining: NGN {loan.remainingAmount.toLocaleString()}
                         </div>
                       </div>
                     </TableCell>
@@ -200,7 +200,7 @@ export default function LoansPage() {
                         {loan.nextPaymentDate}
                       </div>
                     </TableCell>
-                    <TableCell>KES {loan.monthlyPayment.toLocaleString()}</TableCell>
+                    <TableCell>NGN {loan.monthlyPayment.toLocaleString()}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
                         <Link href={`/loans/${loan.id}`}>

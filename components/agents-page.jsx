@@ -21,7 +21,7 @@ export default function AgentsPage() {
     const fetchAgents = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${https.baseUrl}/agents/me`, {
+        const response = await fetch(`${https.baseUrl}/agents`, {
           headers: {
             "x-auth-token": token,
           },
@@ -75,7 +75,7 @@ export default function AgentsPage() {
             <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">KES 2.4M</div>
+            <div className="text-2xl font-bold">NGN 2.4M</div>
             <p className="text-xs text-muted-foreground">+12% from last month</p>
           </CardContent>
         </Card>
@@ -120,7 +120,7 @@ export default function AgentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {agentsData.map((agent) => (
+              {agentsData.length > 0 && agentsData.map((agent) => (
                 <TableRow key={agent.id}>
                   <TableCell>
                     <div>
@@ -150,8 +150,8 @@ export default function AgentsPage() {
                     <Badge variant={agent.status === "Active" ? "default" : "secondary"}>{agent.status}</Badge>
                   </TableCell>
                   <TableCell>{agent.devicesManaged}</TableCell>
-                  <TableCell>KES {agent.totalSales.toLocaleString()}</TableCell>
-                  <TableCell>{agent.lastActive}</TableCell>
+                  <TableCell>NGN {agent.totalSales}</TableCell>
+                  <TableCell>{agent.last_active}</TableCell>
                   <TableCell>
                     <Link href={`/agents/${agent.id}`}>
                       <Button variant="outline" size="sm">
