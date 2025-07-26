@@ -154,7 +154,7 @@ export default function LoansPage() {
                     <TableCell>
                       <div className="space-y-2">
                         <Progress value={progressPercentage} className="w-[60px]" />
-                        <div className="text-xs text-muted-foreground">{progressPercentage.toFixed(1)}%</div>
+                        <div className="text-xs text-muted-foreground">{progressPercentage}%</div>
                       </div>
                     </TableCell>
                     <TableCell>

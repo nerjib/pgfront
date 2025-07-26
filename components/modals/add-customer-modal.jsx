@@ -98,6 +98,7 @@ export function AddCustomerModal({ onCustomerAdded }) {
         notes: "",
         credit_score: 0,
         status: "New",
+        role: "customer",
       });
     } catch (error) {
       console.error("Error adding customer:", error);

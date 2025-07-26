@@ -20,6 +20,7 @@ import { Check, ChevronsUpDown, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import https from "@/services/https";
 import { toast } from "@/hooks/use-toast";
+import { Textarea } from "../ui/textarea"
 
 export function AddLoanModal({ onLoanAdded }) {
   const [open, setOpen] = useState(false);
@@ -33,7 +34,9 @@ export function AddLoanModal({ onLoanAdded }) {
     device_price: "",
     term_months: "",
     down_payment: "0",
-    guarantor_details: "",
+    guarantor_name: "",
+    guarantor_phone: "",
+    guarantor_address: "",
     agent_id: "",
   });
 
@@ -92,6 +95,15 @@ export function AddLoanModal({ onLoanAdded }) {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
+      let parsedGuarantorDetails = null;
+      if (formData.guarantor_details) {
+        try {
+          parsedGuarantorDetails = JSON.parse(formData.guarantor_details);
+        } catch (jsonError) {
+          throw new Error("Invalid JSON for guarantor details.");
+        }
+      }
+
       const response = await fetch(`${https.baseUrl}/loans`, {
         method: "POST",
         headers: {
@@ -99,10 +111,17 @@ export function AddLoanModal({ onLoanAdded }) {
           "x-auth-token": token,
         },
         body: JSON.stringify({
-          ...formData,
+          customer_id: formData.customer_id,
+          device_id: formData.device_id,
           device_price: parseFloat(formData.device_price),
           term_months: parseInt(formData.term_months),
           down_payment: parseFloat(formData.down_payment),
+          guarantor_details: {
+            name: formData.guarantor_name,
+            phone: formData.guarantor_phone,
+            address: formData.guarantor_address,
+          },
+          agent_id: formData.agent_id || null,
         }),
       });
 
@@ -253,12 +272,32 @@ export function AddLoanModal({ onLoanAdded }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="guarantor_details">Guarantor Details</Label>
+              <Label htmlFor="guarantor_name">Guarantor Name</Label>
               <Input
-                id="guarantor_details"
-                value={formData.guarantor_details}
-                onChange={(e) => handleInputChange("guarantor_details", e.target.value)}
-                placeholder="Name, Phone, etc."
+                id="guarantor_name"
+                value={formData.guarantor_name}
+                onChange={(e) => handleInputChange("guarantor_name", e.target.value)}
+                placeholder="Guarantor's Full Name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="guarantor_phone">Guarantor Phone</Label>
+              <Input
+                id="guarantor_phone"
+                value={formData.guarantor_phone}
+                onChange={(e) => handleInputChange("guarantor_phone", e.target.value)}
+                placeholder="Guarantor's Phone Number"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="guarantor_address">Guarantor Address</Label>
+              <Input
+                id="guarantor_address"
+                value={formData.guarantor_address}
+                onChange={(e) => handleInputChange("guarantor_address", e.target.value)}
+                placeholder="Guarantor's Address"
               />
             </div>
 
@@ -285,7 +324,7 @@ export function AddLoanModal({ onLoanAdded }) {
                       {agents.map((agent) => (
                         <CommandItem
                           key={agent.id}
-                          value={agent.username}
+                          value={agent.name}
                           onSelect={() => {
                             handleInputChange("agent_id", agent.id);
                           }}
