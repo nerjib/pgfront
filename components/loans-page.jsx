@@ -9,67 +9,47 @@ import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
 import { QuickRecordPayment } from "./quick-record-payment"
-
-const loansData = [
-  {
-    id: "LN001",
-    customer: "James Ochieng",
-    deviceId: "DEV001",
-    loanAmount: 25000,
-    paidAmount: 18500,
-    remainingAmount: 6500,
-    monthlyPayment: 2500,
-    startDate: "2024-01-15",
-    endDate: "2024-12-15",
-    status: "Current",
-    nextPaymentDate: "2024-03-15",
-    daysOverdue: 0,
-  },
-  {
-    id: "LN002",
-    customer: "Sarah Wanjiru",
-    deviceId: "DEV002",
-    loanAmount: 45000,
-    paidAmount: 22500,
-    remainingAmount: 22500,
-    monthlyPayment: 3750,
-    startDate: "2024-01-20",
-    endDate: "2025-01-20",
-    status: "Current",
-    nextPaymentDate: "2024-03-20",
-    daysOverdue: 0,
-  },
-  {
-    id: "LN003",
-    customer: "David Kiprop",
-    deviceId: "DEV003",
-    loanAmount: 30000,
-    paidAmount: 15000,
-    remainingAmount: 15000,
-    monthlyPayment: 2500,
-    startDate: "2024-01-10",
-    endDate: "2024-12-10",
-    status: "Overdue",
-    nextPaymentDate: "2024-02-10",
-    daysOverdue: 15,
-  },
-  {
-    id: "LN004",
-    customer: "Mary Nyong'o",
-    deviceId: "DEV004",
-    loanAmount: 35000,
-    paidAmount: 35000,
-    remainingAmount: 0,
-    monthlyPayment: 2917,
-    startDate: "2023-08-01",
-    endDate: "2024-08-01",
-    status: "Completed",
-    nextPaymentDate: "N/A",
-    daysOverdue: 0,
-  },
-]
+import { AddLoanModal } from "./modals/add-loan-modal"
+import { useState, useEffect } from "react";
+import https from "@/services/https";
 
 export default function LoansPage() {
+  const [loans, setLoans] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchLoans = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/loans`, {
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch loans");
+      }
+      const data = await response.json();
+      setLoans(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLoans();
+  }, []);
+
+  if (loading) {
+    return <div>Loading loans...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -77,10 +57,7 @@ export default function LoansPage() {
           <h1 className="text-3xl font-bold">Loans</h1>
           <p className="text-muted-foreground">Manage customer loans and payment schedules</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          New Loan
-        </Button>
+        <AddLoanModal onLoanAdded={fetchLoans} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -90,8 +67,8 @@ export default function LoansPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,247</div>
-            <p className="text-xs text-muted-foreground">+12 this month</p>
+            <div className="text-2xl font-bold">{loans.length}</div>
+            <p className="text-xs text-muted-foreground">{/* +12 this month */}</p>
           </CardContent>
         </Card>
         <Card>
@@ -100,8 +77,8 @@ export default function LoansPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">892</div>
-            <p className="text-xs text-muted-foreground">71.5% of total</p>
+            <div className="text-2xl font-bold">{loans.filter(loan => loan.status === 'Current').length}</div>
+            <p className="text-xs text-muted-foreground">{/* 71.5% of total */}</p>
           </CardContent>
         </Card>
         <Card>
@@ -110,8 +87,8 @@ export default function LoansPage() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">45</div>
-            <p className="text-xs text-muted-foreground">3.6% of active</p>
+            <div className="text-2xl font-bold">{loans.filter(loan => loan.status === 'Overdue').length}</div>
+            <p className="text-xs text-muted-foreground">{/* 3.6% of active */}</p>
           </CardContent>
         </Card>
         <Card>
@@ -119,8 +96,8 @@ export default function LoansPage() {
             <CardTitle className="text-sm font-medium">Collection Rate</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">94.2%</div>
-            <p className="text-xs text-muted-foreground">+1.2% from last month</p>
+            <div className="text-2xl font-bold">{/* 94.2% */}</div>
+            <p className="text-xs text-muted-foreground">{/* +1.2% from last month */}</p>
           </CardContent>
         </Card>
       </div>
@@ -155,22 +132,22 @@ export default function LoansPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loansData.map((loan) => {
-                const progressPercentage = (loan.paidAmount / loan.loanAmount) * 100
+              {loans.map((loan) => {
+                const progressPercentage = loan.payment_progress || 0;
                 return (
-                  <TableRow key={loan.id}>
+                  <TableRow key={loan.loan_id}>
                     <TableCell>
                       <div>
-                        <div className="font-medium">{loan.id}</div>
-                        <div className="text-sm text-muted-foreground">{loan.deviceId}</div>
+                        <div className="font-medium">{loan.loan_id}</div>
+                        <div className="text-sm text-muted-foreground">{/* loan.deviceId */}</div>
                       </div>
                     </TableCell>
-                    <TableCell>{loan.customer}</TableCell>
+                    <TableCell>{loan.customer_name}</TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">NGN {loan.loanAmount.toLocaleString()}</div>
+                        <div className="font-medium">NGN {loan.loan_amount?.toLocaleString()}</div>
                         <div className="text-sm text-muted-foreground">
-                          Remaining: NGN {loan.remainingAmount.toLocaleString()}
+                          {/* Remaining: NGN {loan.remainingAmount.toLocaleString()} */}
                         </div>
                       </div>
                     </TableCell>
@@ -191,37 +168,37 @@ export default function LoansPage() {
                         }
                       >
                         {loan.status}
-                        {loan.daysOverdue > 0 && ` (${loan.daysOverdue}d)`}
+                        {/* {loan.daysOverdue > 0 && ` (${loan.daysOverdue}d)`} */}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center">
                         <Calendar className="mr-1 h-3 w-3" />
-                        {loan.nextPaymentDate}
+                        {new Date(loan.next_payment).toLocaleDateString()}
                       </div>
                     </TableCell>
-                    <TableCell>NGN {loan.monthlyPayment.toLocaleString()}</TableCell>
+                    <TableCell>NGN {loan.monthly_payment?.toLocaleString()}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Link href={`/loans/${loan.id}`}>
+                        <Link href={`/loans/${loan.loan_id}`}>
                           <Button variant="outline" size="sm">
                             Manage
                           </Button>
                         </Link>
                         <QuickRecordPayment
                           loan={{
-                            id: loan.id,
-                            loanNumber: loan.id,
-                            customer: { name: loan.customer },
+                            id: loan.loan_id,
+                            loanNumber: loan.loan_id,
+                            customer: { name: loan.customer_name },
                             loanDetails: {
-                              remainingAmount: loan.remainingAmount,
-                              monthlyPayment: loan.monthlyPayment,
-                              nextPaymentDate: loan.nextPaymentDate,
+                              remainingAmount: loan.loan_amount - (loan.loan_amount * (loan.payment_progress / 100)),
+                              monthlyPayment: loan.monthly_payment,
+                              nextPaymentDate: loan.next_payment,
                               status: loan.status,
                             },
                           }}
                           onPaymentRecorded={(paymentData) => {
-                            console.log("Payment recorded for loan:", loan.id, paymentData)
+                            console.log("Payment recorded for loan:", loan.loan_id, paymentData)
                             // Handle payment recording - refresh data, show success message, etc.
                           }}
                           size="sm"
