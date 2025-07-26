@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,42 +16,89 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Plus } from "lucide-react"
+import https from "@/services/https";
 
 export function AddDeviceModal() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [deviceTypes, setDeviceTypes] = useState([]);
   const [formData, setFormData] = useState({
     serialNumber: "",
-    deviceType: "",
-    model: "",
+    deviceTypeId: "", // Changed to deviceTypeId
     customer: "",
     location: "",
     installationDate: "",
     notes: "",
-  })
+  });
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle form submission here
-    console.log("Adding device:", formData)
-    // Reset form and close modal
-    setFormData({
-      serialNumber: "",
-      deviceType: "",
-      model: "",
-      customer: "",
-      location: "",
-      installationDate: "",
-      notes: "",
-    })
-    setOpen(false)
-  }
+  useEffect(() => {
+    const fetchDeviceTypes = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch(`${https.baseUrl}/device-types`, {
+          headers: {
+            "x-auth-token": token,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch device types");
+        }
+        const data = await response.json();
+        setDeviceTypes(data);
+      } catch (error) {
+        console.error("Error fetching device types:", error);
+      }
+    };
+    fetchDeviceTypes();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/devices`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token,
+        },
+        body: JSON.stringify({
+          serial_number: formData.serialNumber,
+          device_type_id: formData.deviceTypeId, // Changed to device_type_id
+          // customer_id: formData.customer, // Assuming customer is customer_id
+          // location: formData.location,
+          // installation_date: formData.installationDate,
+          // notes: formData.notes,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || "Failed to add device");
+      }
+
+      const data = await response.json();
+      console.log("Device added successfully:", data);
+      setOpen(false);
+      setFormData({
+        serialNumber: "",
+        deviceTypeId: "",
+        customer: "",
+        location: "",
+        installationDate: "",
+        notes: "",
+      });
+    } catch (error) {
+      console.error("Error adding device:", error);
+      alert(error.message);
+    }
+  };
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-    }))
-  }
+    }));
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -84,41 +131,23 @@ export function AddDeviceModal() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="deviceType" className="text-right">
+              <Label htmlFor="deviceTypeId" className="text-right">
                 Device Type
               </Label>
-              <Select onValueChange={(value) => handleInputChange("deviceType", value)} required>
+              <Select onValueChange={(value) => handleInputChange("deviceTypeId", value)} required>
                 <SelectTrigger className="col-span-3">
                   <SelectValue placeholder="Select device type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="solar-home-system">Solar Home System</SelectItem>
-                  <SelectItem value="water-pump">Water Pump</SelectItem>
-                  <SelectItem value="solar-lantern">Solar Lantern</SelectItem>
-                  <SelectItem value="cooking-stove">Cooking Stove</SelectItem>
-                  <SelectItem value="tv-system">TV System</SelectItem>
+                  {deviceTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.device_name} ({type.device_model})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="model" className="text-right">
-                Model
-              </Label>
-              <Select onValueChange={(value) => handleInputChange("model", value)} required>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="SHS-50W">SHS-50W</SelectItem>
-                  <SelectItem value="SHS-100W">SHS-100W</SelectItem>
-                  <SelectItem value="SHS-200W">SHS-200W</SelectItem>
-                  <SelectItem value="WP-500L">WP-500L</SelectItem>
-                  <SelectItem value="WP-1000L">WP-1000L</SelectItem>
-                  <SelectItem value="SL-20W">SL-20W</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* <div className="grid grid-cols-4 items-center gap-4" hidden>
               <Label htmlFor="customer" className="text-right">
                 Customer
               </Label>
@@ -131,7 +160,7 @@ export function AddDeviceModal() {
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4" hidden>
               <Label htmlFor="location" className="text-right">
                 Location
               </Label>
@@ -144,7 +173,7 @@ export function AddDeviceModal() {
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-4 items-center gap-4" hidden>
               <Label htmlFor="installationDate" className="text-right">
                 Installation Date
               </Label>
@@ -156,7 +185,7 @@ export function AddDeviceModal() {
                 className="col-span-3"
                 required
               />
-            </div>
+            </div> */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="notes" className="text-right">
                 Notes
@@ -180,5 +209,5 @@ export function AddDeviceModal() {
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
