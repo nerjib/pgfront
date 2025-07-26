@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { RecordLoanPaymentModal } from "./modals/record-loan-payment-modal"
 import {
   MessageSquare,
   Phone,
@@ -48,6 +49,14 @@ export function CustomerQuickActions({ customer, onAction, isLoading }) {
   ]
 
   const managementActions = [
+    {
+      id: "record-loan-payment",
+      label: "Record Loan Payment",
+      icon: CreditCard,
+      variant: "outline",
+      description: "Record a payment for a loan",
+      component: RecordLoanPaymentModal,
+    },
     {
       id: "update-credit",
       label: "Update Credit Score",
@@ -112,17 +121,21 @@ export function CustomerQuickActions({ customer, onAction, isLoading }) {
         </CardHeader>
         <CardContent className="space-y-3">
           {managementActions.map((action) => (
-            <Button
-              key={action.id}
-              variant={action.variant}
-              size="sm"
-              onClick={() => onAction(action.id)}
-              disabled={isLoading}
-              className={`w-full justify-start ${action.color || ""}`}
-            >
-              <action.icon className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-              {action.label}
-            </Button>
+            action.component ? (
+              <action.component key={action.id} customerId={customer.id} />
+            ) : (
+              <Button
+                key={action.id}
+                variant={action.variant}
+                size="sm"
+                onClick={() => onAction(action.id)}
+                disabled={isLoading}
+                className={`w-full justify-start ${action.color || ""}`}
+              >
+                <action.icon className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                {action.label}
+              </Button>
+            )
           ))}
         </CardContent>
       </Card>

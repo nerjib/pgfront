@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { EditCustomerModal } from "./modals/edit-customer-modal"
+import { RecordLoanPaymentModal } from "./modals/record-loan-payment-modal"
 import { CustomerQuickActions } from "./customer-quick-actions"
 
 import { useState, useEffect } from "react"
@@ -28,29 +29,42 @@ import https from "@/services/https";
 
 export default function CustomerDetailPage({ customerId }) {
   const [customer, setCustomer] = useState(null);
+  const [loans, setLoans] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchCustomer = async () => {
+    const fetchCustomerData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch(`${https.baseUrl}/customers/${customerId}`, {
+        const customerResponse = await fetch(`${https.baseUrl}/customers/${customerId}`, {
           headers: {
             "x-auth-token": token,
           },
         });
-        if (!response.ok) {
+        if (!customerResponse.ok) {
           throw new Error("Failed to fetch customer data");
         }
-        const data = await response.json();
-        setCustomer(data);
+        const customerData = await customerResponse.json();
+        setCustomer(customerData);
+
+        const loansResponse = await fetch(`${https.baseUrl}/loans/customer/${customerId}`, {
+          headers: {
+            "x-auth-token": token,
+          },
+        });
+        if (!loansResponse.ok) {
+          throw new Error("Failed to fetch loans data");
+        }
+        const loansData = await loansResponse.json();
+        setLoans(loansData);
+
       } catch (error) {
-        console.error("Error fetching customer:", error);
+        console.error("Error fetching customer data:", error);
       }
     };
 
     if (customerId) {
-      fetchCustomer();
+      fetchCustomerData();
     }
   }, [customerId]);
 
@@ -237,8 +251,9 @@ export default function CustomerDetailPage({ customerId }) {
 
             <TabsContent value="loans" className="space-y-4">
               <Card>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle>Active Loans</CardTitle>
+                  <RecordLoanPaymentModal customerId={customerId} />
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -253,7 +268,7 @@ export default function CustomerDetailPage({ customerId }) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {customer.loans && customer.loans.map((loan) => (
+                      {loans && loans.map((loan) => (
                         <TableRow key={loan.id}>
                           <TableCell>
                             <Link href={`/loans/${loan.id}`} className="text-blue-600 hover:underline">
