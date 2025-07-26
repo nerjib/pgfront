@@ -56,19 +56,61 @@ export default function LoanDetailPage({ loanId }) {
     }
   };
 
+  const [userRole, setUserRole] = useState(null);
+
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decodedToken = JSON.parse(atob(token.split('.')[1])); // Decode JWT payload
+        setUserRole(decodedToken.user.role);
+      } catch (e) {
+        console.error("Error decoding token:", e);
+      }
+    }
     if (loanId) {
       fetchLoanData();
     }
   }, [loanId]);
 
   const handleLoanAction = async (action) => {
-    setIsLoading(true)
-    console.log(`Performing ${action} on loan ${loanId}`)
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsLoading(false)
-  }
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      let url = `${https.baseUrl}/loans/${loanId}`;
+      let method = "PUT";
+      let body = {};
+
+      if (action === "approve") {
+        url += "/approve";
+      } else if (action === "reject") {
+        // Assuming a reject endpoint or status update
+        url = `${https.baseUrl}/loans/${loanId}`;
+        body = { status: "rejected" }; // Or whatever status indicates rejection
+      }
+
+      const response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to ${action} loan`);
+      }
+
+      // Refresh loan data after successful action
+      await fetchLoanData();
+    } catch (err) {
+      setError(err.message);
+      console.error(`Error ${action}ing loan:`, err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   if (isLoading || !loan) {
     return <div>Loading loan data...</div>;
@@ -99,17 +141,31 @@ export default function LoanDetailPage({ loanId }) {
         <div className="flex items-center space-x-2">
           <Badge
             variant={
-              loan.status === "Current"
+              loan.status === "active"
                 ? "default"
-                : loan.status === "Overdue"
+                : loan.status === "defaulted"
                   ? "destructive"
-                  : "secondary"
+                  : loan.status === "pending"
+                    ? "warning"
+                    : "secondary"
             }
           >
             {loan.status}
             {/* {loan.loanDetails.daysOverdue > 0 && ` (${loan.loanDetails.daysOverdue}d overdue)`} */}
           </Badge>
           <EditLoanModal loan={loan} onUpdate={fetchLoanData} />
+          {loan.status === "pending" && userRole === "admin" && (
+            <>
+              <Button variant="success" onClick={() => handleLoanAction("approve")}>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Approve Loan
+              </Button>
+              <Button variant="destructive" onClick={() => handleLoanAction("reject")}>
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                Reject Loan
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

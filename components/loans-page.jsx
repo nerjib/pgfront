@@ -77,7 +77,7 @@ export default function LoansPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{loans.filter(loan => loan.status === 'Current').length}</div>
+            <div className="text-2xl font-bold">{loans.filter(loan => loan.status === 'active').length}</div>
             <p className="text-xs text-muted-foreground">{/* 71.5% of total */}</p>
           </CardContent>
         </Card>
@@ -87,7 +87,7 @@ export default function LoansPage() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{loans.filter(loan => loan.status === 'Overdue').length}</div>
+            <div className="text-2xl font-bold">{loans.filter(loan => loan.status === 'overdue').length}</div>
             <p className="text-xs text-muted-foreground">{/* 3.6% of active */}</p>
           </CardContent>
         </Card>
@@ -145,7 +145,7 @@ export default function LoansPage() {
                     <TableCell>{loan.customer_name}</TableCell>
                     <TableCell>
                       <div>
-                        <div className="font-medium">NGN {loan.loan_amount?.toLocaleString()}</div>
+                        <div className="font-medium">NGN {parseFloat(loan.loan_amount)?.toLocaleString()}</div>
                         <div className="text-sm text-muted-foreground">
                           {/* Remaining: NGN {loan.remainingAmount.toLocaleString()} */}
                         </div>
@@ -154,17 +154,19 @@ export default function LoansPage() {
                     <TableCell>
                       <div className="space-y-2">
                         <Progress value={progressPercentage} className="w-[60px]" />
-                        <div className="text-xs text-muted-foreground">{progressPercentage}%</div>
+                        <div className="text-xs text-muted-foreground">{parseFloat(progressPercentage).toFixed(1)}%</div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant={
-                          loan.status === "Current"
+                          loan.status === "active"
                             ? "default"
-                            : loan.status === "Overdue"
+                            : loan.status === "defaulted"
                               ? "destructive"
-                              : "secondary"
+                              : loan.status === "pending"
+                                ? "warning"
+                                : "secondary"
                         }
                       >
                         {loan.status}
