@@ -1,5 +1,6 @@
-import AgentDetailPage from "../../../components/agent-detail-page"
+import AgentDetailPage from "@/components/agent-detail-page"
 
-export default function AgentPage({ params }) {
-  return <AgentDetailPage agentId={params.id} />
+export default async function AgentPage({ params }) {
+  const resolvedParams = await params;
+  return <AgentDetailPage agentId={resolvedParams.id} />
 }

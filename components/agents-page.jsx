@@ -80,7 +80,7 @@ export default function AgentsPage() {
             <CardTitle className="text-sm font-medium">Devices Managed</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{agentsData.reduce((acc, agent) => acc + (agent.devicesManaged || 0), 0)}</div>
+            <div className="text-2xl font-bold">{agentsData.reduce((acc, agent) => acc + parseFloat(agent.devicesManaged || 0), 0)}</div>
             <p className="text-xs text-muted-foreground">{/* Dynamic data */}</p>
           </CardContent>
         </Card>
@@ -150,9 +150,11 @@ export default function AgentsPage() {
                   <TableCell>{agent.last_active ? new Date(agent.last_active).toLocaleString() : 'N/A'}</TableCell>
                   <TableCell>
                     <Link href={`/agents/${agent.id}`}>
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
+                      <Link href={`/agents/${agent.id}`}>
+                          <Button variant="outline" size="sm">
+                            View Details
+                          </Button>
+                        </Link>
                     </Link>
                   </TableCell>
                 </TableRow>
