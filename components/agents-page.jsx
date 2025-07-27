@@ -8,6 +8,7 @@ import { Search, Filter, MapPin, Phone, Mail } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { AddAgentModal } from "./modals/add-agent-modal"
 import { AddSuperAgentModal } from "./modals/add-super-agent-modal";
+import { EditSuperAgentModal } from "./modals/edit-super-agent-modal";
 import Link from "next/link"
 
 import { useState, useEffect } from "react";
@@ -184,11 +185,16 @@ export default function AgentsPage() {
                   <TableCell>NGN {agent.totalSales ? parseFloat(agent.totalSales).toLocaleString() : 0}</TableCell>
                   <TableCell>{agent.last_active ? new Date(agent.last_active).toLocaleString() : 'N/A'}</TableCell>
                   <TableCell>
-                    <Link href={`/agents/${agent.id}`}>
-                      <Button variant="outline" size="sm">
-                        View Details
-                      </Button>
-                    </Link>
+                    <div className="flex items-center space-x-2">
+                      <Link href={`/super-agents/${agent.id}`}>
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                      </Link>
+                      {activeTab === "super-agents" && (
+                        <EditSuperAgentModal superAgent={agent} onUpdate={fetchSuperAgents} />
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
