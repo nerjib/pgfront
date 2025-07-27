@@ -20,7 +20,6 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import https from "@/services/https"
-import { EditAgentModal } from "./modals/edit-agent-modal"
 
 export default function AgentDetailPage({ agentId }) {
   const [agent, setAgent] = useState(null)
