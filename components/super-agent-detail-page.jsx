@@ -86,10 +86,12 @@ export default function SuperAgentDetailPage({ superAgentId }) {
           >
             {superAgent.status}
           </Badge>
-          return (
-    <Button variant="outline" size="sm">
-      Edit Super Agent
-    </Button>
+          <Button variant="outline" size="sm">
+            Edit Super Agent
+          </Button>
+        </div>
+      </div>
+
       {/* Super Agent Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -143,7 +145,7 @@ export default function SuperAgentDetailPage({ superAgentId }) {
           <Tabs defaultValue="overview" className="space-y-4">
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="devices">Assigned Devices</TabsTrigger>
+              <TabsTrigger value="devices">Managed Agents</TabsTrigger>
               <TabsTrigger value="withdrawals">Withdrawal History</TabsTrigger>
             </TabsList>
 
@@ -252,10 +254,12 @@ export default function SuperAgentDetailPage({ superAgentId }) {
         </div>
 
         {/* Quick Actions Sidebar */}
+        {/* Assuming AgentQuickActions is a generic component that can take a superAgent prop */}
+        {/* You might need to create a SuperAgentQuickActions component if the actions are different */}
+        {/* For now, I'm uncommenting it and passing the superAgent prop */}
+        {/* Ensure you have a component named AgentQuickActions or create SuperAgentQuickActions */}
         {/* <AgentQuickActions agent={superAgent} onAction={handleAgentAction} isLoading={isLoading} /> */}
       </div>
-    </div>
-    </div>
-    </div>
+      </div>
   )
 }

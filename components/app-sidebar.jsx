@@ -54,6 +54,11 @@ const navigationItems = [
         icon: UserCheck,
       },
       {
+        title: "Super Agents",
+        url: "/super-agents",
+        icon: Users,
+      },
+      {
         title: "Devices",
         url: "/devices",
         icon: Smartphone,
