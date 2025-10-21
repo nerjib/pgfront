@@ -1,0 +1,104 @@
+"use client"
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Link from "next/link";
+import { Zap } from "lucide-react";
+import https from "@/services/https";
+
+export default function ForgotPassword() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
+
+// ... (imports)
+
+  const handleSubmit = async (e) => {
+    return
+    e.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch(`${https.baseUrl}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
+      }
+
+      const { token } = await response.json();
+      localStorage.setItem("token", token);
+      router.push("/dashboard");
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="flex justify-center items-center mb-4">
+            <div className="h-8 w-8">
+              <img src="/logo.png" alt="log" />
+            </div>
+            <span className="font-bold text-2xl ml-2">RayKonet </span>
+          </div>
+          <CardTitle className="text-2xl">Password Reset</CardTitle>
+          <CardDescription>
+            Enter your username to receive reset link in the email associated to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="existinguser"
+                required
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Button type="submit" className="w-full">
+              Send new Password to Email
+            </Button>
+            {/* <Button variant="outline" className="w-full">
+              Sign in with Google
+            </Button> */}
+          </form>
+          
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
