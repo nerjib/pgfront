@@ -31,6 +31,7 @@ export default function SuperAgentDetailPage({ superAgentId }) {
   const [managedDevices, setManagedDevices] = useState([]);
   const [isDevicesLoading, setIsDevicesLoading] = useState(false);
   const [devicesError, setDevicesError] = useState(null);
+  const [isGeneratingAccount, setIsGeneratingAccount] = useState(false);
 
 
   const fetchSuperAgentData = async () => {
@@ -73,6 +74,29 @@ export default function SuperAgentDetailPage({ superAgentId }) {
         console.error("Error fetching managed devices:", err);
     } finally {
         setIsDevicesLoading(false);
+    }
+  };
+
+  const generateAccountNumber = async () => {
+    setIsGeneratingAccount(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/agents/${superAgentId}/dedicated-account`, {
+        method: 'POST',
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to generate account number");
+      }
+      // Refresh agent data to get the new account number
+      fetchSuperAgentData();
+    } catch (err) {
+      setError(err.message);
+      console.error("Error generating account number:", err);
+    } finally {
+      setIsGeneratingAccount(false);
     }
   };
 
@@ -230,7 +254,17 @@ export default function SuperAgentDetailPage({ superAgentId }) {
                     </div>
                     <div className="flex items-center space-x-2">
                       <History className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Last Active: {new Date(superAgent.lastActive).toLocaleString()}</span>
+                      <span className="text-sm">Last Active: {superAgent?.lastActive ? new Date(superAgent.lastActive).toLocaleString() : 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Wallet className="h-4 w-4 text-muted-foreground" />
+                      {superAgent.accountNumber ? (
+                        <span className="text-sm">{superAgent.accountNumber}</span>
+                      ) : (
+                        <Button onClick={generateAccountNumber} disabled={isGeneratingAccount}>
+                          {isGeneratingAccount ? 'Generating...' : 'Generate Account Number'}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

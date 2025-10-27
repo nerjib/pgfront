@@ -29,6 +29,7 @@ export default function AgentDetailPage({ agentId }) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+  const [isGeneratingAccount, setIsGeneratingAccount] = useState(false);
 
   const fetchAgentData = async () => {
     setIsLoading(true)
@@ -51,6 +52,29 @@ export default function AgentDetailPage({ agentId }) {
       setIsLoading(false)
     }
   }
+
+  const generateAccountNumber = async () => {
+    setIsGeneratingAccount(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/agents/${agentId}/dedicated-account`, {
+        method: 'POST',
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to generate account number");
+      }
+      // Refresh agent data to get the new account number
+      fetchAgentData();
+    } catch (err) {
+      setError(err.message);
+      console.error("Error generating account number:", err);
+    } finally {
+      setIsGeneratingAccount(false);
+    }
+  };
 
   useEffect(() => {
     if (agentId) {
@@ -207,7 +231,17 @@ export default function AgentDetailPage({ agentId }) {
                     </div>
                     <div className="flex items-center space-x-2">
                       <History className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">Last Active: {new Date(agent.lastActive).toLocaleString()}</span>
+                      <span className="text-sm">Last Active: { agent.lastActive ? new Date(agent.lastActive).toLocaleString() : 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Wallet className="h-4 w-4 text-muted-foreground" />
+                      {agent.accountNumber ? (
+                        <span className="text-sm">Account No: {agent.accountNumber}</span>
+                      ) : (
+                        <Button onClick={generateAccountNumber} disabled={isGeneratingAccount}>
+                          {isGeneratingAccount ? 'Generating...' : 'Generate Account Number'}
+                        </Button>
+                      )}
                     </div>
                 </CardContent>
               </Card>

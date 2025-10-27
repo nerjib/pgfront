@@ -4,14 +4,22 @@ import "./globals.css";
 import { AppSidebar } from "../components/app-sidebar";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { UserCircle } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({ children }) {
   const pathname = usePathname();
+  const router = useRouter();
   const showSidebar = (pathname !== "/" && pathname !== "/login" && pathname !== "/forgot-password");
   const [userFullName, setUserFullName] = useState("");
 
@@ -22,6 +30,12 @@ export default function RootLayout({ children }) {
       setUserFullName(parsedData.user?.name || "");
     }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("auth");
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
 
   return (
     <html lang="en">
@@ -44,10 +58,19 @@ export default function RootLayout({ children }) {
                 </div>
                 <div className="flex-grow" />
                 {userFullName && (
-                  <span className="font-medium text-sm flex items-center gap-1">
-                    <UserCircle className="h-4 w-4" />
-                    {userFullName}
-                  </span>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="font-medium text-sm flex items-center gap-1">
+                        <UserCircle className="h-4 w-4" />
+                        {userFullName}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleLogout}>
+                        Log out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
               </header>
               <main className="flex flex-1 flex-col gap-4 p-4">{children}</main>

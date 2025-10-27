@@ -217,6 +217,7 @@ export default function DevicesPage() {
                 <TabsList>
                   <TabsTrigger value="assigned">Assigned</TabsTrigger>
                   <TabsTrigger value="unassigned">Unassigned</TabsTrigger>
+                  <TabsTrigger value="faulty">Faulty</TabsTrigger>
                 </TabsList>
                 <TabsContent value="assigned">
                   <Table>
@@ -356,6 +357,57 @@ export default function DevicesPage() {
                         <TableRow>
                           <TableCell colSpan={7} className="text-center py-4">
                             No unassigned devices found.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TabsContent>
+                <TabsContent value="faulty">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Device</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Location</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Sync</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredDevices.filter(d => d.status === 'faulty').length > 0 ? (
+                        filteredDevices.filter(d => d.status === 'faulty').map((device) => (
+                          <TableRow key={device.id}>
+                            <TableCell>
+                              <div>
+                                <div className="font-medium">{device.type}</div>
+                                <div className="text-sm text-muted-foreground">{device.serialNumber}</div>
+                                <div className="text-xs text-muted-foreground">{device.model}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{device.assignedToCustomerName ?? device.assignedToCustomerUsername ?? 'N/A'}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <MapPin className="mr-1 h-3 w-3" />
+                                {device.location ?? 'N/A'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="destructive">{device.status}</Badge>
+                            </TableCell>
+                            <TableCell>{device.lastSync}</TableCell>
+                            <TableCell>
+                              <Button variant="outline" size="sm" onClick={() => reprocessDevice(device.id)}>
+                                Reprocess
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center py-4">
+                            No faulty devices found.
                           </TableCell>
                         </TableRow>
                       )}

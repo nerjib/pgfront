@@ -122,6 +122,7 @@ export default function LoansPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Loan ID</TableHead>
+                <TableHead>Loan Account Number</TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Loan Amount</TableHead>
                 <TableHead>Progress</TableHead>
@@ -143,6 +144,7 @@ export default function LoansPage() {
                         <div className="text-sm text-muted-foreground">{/* loan.deviceId */}</div>
                       </div>
                     </TableCell>
+                    <TableCell>{loan.account_number ?? 'N/A'}</TableCell>
                     <TableCell>{loan.customer_name}</TableCell>
                     <TableCell>
                       <div>
@@ -183,7 +185,7 @@ export default function LoansPage() {
                     <TableCell>
                       <div className="flex items-center">
                         <Calendar className="mr-1 h-3 w-3" />
-                        {new Date(loan.next_payment).toLocaleDateString()}
+                        {loan.next_payment ? new Date(loan.next_payment).toLocaleDateString(): 'N/A'}
                       </div>
                     </TableCell>
                     <TableCell>NGN {loan.payment_cycle_amount?.toLocaleString()}</TableCell>

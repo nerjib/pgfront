@@ -266,6 +266,7 @@ export default function AgentsPage() {
                 <TableRow>
                   <TableHead>{activeTab === "agents" ? "Agent" : "Super Agent"}</TableHead>
                   <TableHead>Contact</TableHead>
+                  <TableHead>Account Number</TableHead>
                   <TableHead>Region</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Credit Balance</TableHead>
@@ -296,6 +297,11 @@ export default function AgentsPage() {
                           <Phone className="mr-1 h-3 w-3" />
                           {agent.phone}
                         </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        {agent.accountNumber ?? 'N/A'}
                       </div>
                     </TableCell>
                     <TableCell>

@@ -365,6 +365,7 @@ export default function CustomerDetailPage({ customerId }) {
                         <TableHead>Amount</TableHead>
                         <TableHead>Method</TableHead>
                         <TableHead>Reference</TableHead>
+                        <TableHead>Token</TableHead>
                         <TableHead>Loan</TableHead>
                         <TableHead>Status</TableHead>
                       </TableRow>
@@ -376,6 +377,7 @@ export default function CustomerDetailPage({ customerId }) {
                           <TableCell>NGN {payment.amount}</TableCell>
                           <TableCell>{payment.method}</TableCell>
                           <TableCell>{payment.reference}</TableCell>
+                          <TableCell>{payment.token ?? 'N/A'}</TableCell>
                           <TableCell>
                             <Link href={`/loans/${payment.loanId}`} className="text-blue-600 hover:underline">
                               {payment.loanId}

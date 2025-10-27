@@ -35,6 +35,7 @@ export default function LoanDetailPage({ loanId }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isAgreementModalOpen, setIsAgreementModalOpen] = useState(false);
+  const [isGeneratingAccount, setIsGeneratingAccount] = useState(false);
 
   const fetchLoanData = async () => {
     setIsLoading(true);
@@ -132,6 +133,29 @@ export default function LoanDetailPage({ loanId }) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+  };
+
+  const generateAccountNumber = async () => {
+    setIsGeneratingAccount(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${https.baseUrl}/loans/${loanId}/dedicated-account`, {
+        method: 'POST',
+        headers: {
+          "x-auth-token": token,
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Failed to generate account number");
+      }
+      // Refresh loan data to get the new account number
+      fetchLoanData();
+    } catch (err) {
+      setError(err.message);
+      console.error("Error generating account number:", err);
+    } finally {
+      setIsGeneratingAccount(false);
     }
   };
 
@@ -300,7 +324,7 @@ export default function LoanDetailPage({ loanId }) {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">End Date:</span>
-                      <span className="text-sm font-medium">{new Date(loan.endDate).toLocaleDateString()}</span>
+                      <span className="text-sm font-medium">{new Date(new Date(loan.startDate).setMonth(new Date(loan.startDate).getMonth() + loan.termMonths)).toLocaleDateString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm text-muted-foreground">Guarantor:</span>
@@ -313,6 +337,16 @@ export default function LoanDetailPage({ loanId }) {
                       <span className="text-sm font-medium">
                         {loan.agent ? loan.agent.username : "N/A"}
                       </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-muted-foreground">Account Number:</span>
+                      {loan.accountNumber ? (
+                        <span className="text-sm font-medium">{loan.accountNumber}</span>
+                      ) : (
+                        <Button onClick={generateAccountNumber} disabled={isGeneratingAccount} size="sm">
+                          {isGeneratingAccount ? 'Generating...' : 'Generate'}
+                        </Button>
+                      )}
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Signed Agreement:</span>
@@ -408,22 +442,22 @@ export default function LoanDetailPage({ loanId }) {
                         <TableHead>Method</TableHead>
                         <TableHead>Reference</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Late Fee</TableHead>
+                        {/* <TableHead>Late Fee</TableHead> */}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {loan.paymentHistory && loan.paymentHistory.map((payment) => (
                         <TableRow key={payment.id}>
-                          <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
+                          <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell>
                           <TableCell>NGN {parseFloat(payment.amount).toLocaleString()}</TableCell>
-                          <TableCell>{payment.method}</TableCell>
-                          <TableCell>{payment.reference}</TableCell>
+                          <TableCell>{payment.payment_method}</TableCell>
+                          <TableCell>{payment.transaction_id}</TableCell>
                           <TableCell>
-                            <Badge variant={payment.status === "Completed" ? "default" : "destructive"}>
+                            <Badge variant={payment.status === "completed" ? "default" : "destructive"}>
                               {payment.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>{payment.lateFee > 0 ? `NGN ${parseFloat(payment.lateFee).toLocaleString()}` : "-"}</TableCell>
+                          {/* <TableCell>{payment.lateFee > 0 ? `NGN ${parseFloat(payment.lateFee).toLocaleString()}` : "-"}</TableCell> */}
                         </TableRow>
                       ))}
                     </TableBody>
